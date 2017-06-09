@@ -6,7 +6,9 @@
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "aws-sdk": "^2.66.0"
+  },
   "devDependencies": {
     "jest": "^20.0.4"
   },
