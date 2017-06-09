@@ -28,6 +28,8 @@ functions:
       - http:
           path: lexFlightStatus
           method: get
+  lexFlightStatusByName:
+    handler: functions/lexFlightStatusByName/index.handler
   lexSubmitClaim:
     handler: functions/lexSubmitClaim/index.handler
   lexFlightTable:
