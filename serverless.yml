@@ -28,3 +28,5 @@ functions:
       - http:
           path: lexFlightStatus
           method: get
+  lexSubmitClaim:
+    handler: functions/lexSubmitClaim/index.handler
