@@ -63,10 +63,14 @@ function getTimeDiff(a, b){
   return timeString.trim();
 }
 
-function createResponseContent(flight){
-  let flightNumber = flight.identification.number.default;
-  let departureAirport = flight.airport.origin.name;
-  let arrivalAirport = flight.airport.destination.name;
+function isClaimable(scheduledDepartureTime, realDepartureTime) {
+  let milisecDiff = realDepartureTime.getTime() - scheduledDepartureTime.getTime();
+  let dateDiff = new Date( milisecDiff );
+
+  return dateDiff.getHours() >= 3;
+}
+
+function getDepartureTimeData(flight) {
   let scheduledDepartureTime = flight.time.scheduled.departure ? new Date(flight.time.scheduled.departure * 1000) : null;
   let actualDepartureTime = flight.time.real.departure ? new Date(flight.time.real.departure * 1000) : null;
   let estimatedDepartureTime = flight.time.estimated.departure ? new Date(flight.time.estimated.departure * 1000) : null;
@@ -81,8 +85,30 @@ function createResponseContent(flight){
   }
 
   let departInString = getTimeDiff(new Date(), mostRecentDepartureTime);
+  let canClaim = isClaimable(scheduledDepartureTime, mostRecentDepartureTime);
 
-  return `Your flight (${flightNumber}) from ${departureAirport} to ${arrivalAirport} will depart in ${departInString} (on ${departureTimeString}).${statusText}`;
+  return {
+    'statusText': statusText,
+    'departInString': departInString,
+    'departureTimeString': departureTimeString,
+    'isClaimable': canClaim,
+  }
+}
+
+function createResponseContent(flight){
+  let flightNumber = flight.identification.number.default;
+  let departureAirport = flight.airport.origin.name;
+  let arrivalAirport = flight.airport.destination.name;
+
+  let departureTimeData = getDepartureTimeData(flight);
+
+  let responseContent = `Your flight (${flightNumber}) from ${departureAirport} to ${arrivalAirport} will depart in ${departureTimeData.departInString} (on ${departureTimeData.departureTimeString}).${departureTimeData.statusText}`
+
+  if (departureTimeData.isClaimable) {
+    responseContent = responseContent.concat(' Your claim is delayed by more than 3 hours. If you want to claim start the conversation by saying "Claim".')
+  }
+
+  return responseContent;
 }
 
 module.exports.handler = (event, context, callback) => {
