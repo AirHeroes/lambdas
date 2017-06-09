@@ -1,5 +1,6 @@
 'use strict';
 
+const mocks = require('./mocks')
 const https = require('https');
 
 function getRecentFlights(flightNumber) {
@@ -16,6 +17,9 @@ function getRecentFlights(flightNumber) {
   console.log("Getting data from: " + options.path)
 
   return new Promise(function(resolve, reject) {
+    if (flightNumber == mocks.MOCKED_DELAYED_FLIGHT_NUMBER) {
+      resolve(mocks.MOCKED_DELAYED_FLIGHT);
+    } else {
       https.request(options, function(res) {
           res.setEncoding('utf8');
           res.on('data', function(chunk) {
@@ -26,6 +30,7 @@ function getRecentFlights(flightNumber) {
               resolve(JSON.parse(statuses));
           });
       }).end();
+    }
   });
 }
 
