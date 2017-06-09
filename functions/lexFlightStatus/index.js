@@ -29,11 +29,53 @@ function getRecentFlights(flightNumber) {
   });
 }
 
+function getTimeDiff(a, b){
+  let milisecDiff = b.getTime() - a.getTime();
+  let dateDiff = new Date( milisecDiff );
+
+  let timeString = ''
+
+  let days = Math.floor(milisecDiff / 1000 / 60 / (60 * 24));
+
+  if (days > 0) {
+    timeString = timeString.concat(`${days} Days`)
+  }
+
+  if (dateDiff.getHours() > 0) {
+    timeString = timeString.concat(` ${dateDiff.getHours()} Hours`)
+  }
+
+  if (dateDiff.getMinutes() > 0) {
+    timeString = timeString.concat(` ${dateDiff.getMinutes()} Minutes`)
+  }
+
+  if (dateDiff.getSeconds() > 0) {
+    timeString = timeString.concat(` ${dateDiff.getSeconds()} Seconds`)
+  }
+
+  return timeString.trim();
+}
+
 function createResponseContent(flight){
   let flightNumber = flight.identification.number.default;
   let departureAirport = flight.airport.origin.name;
   let arrivalAirport = flight.airport.destination.name;
-  return `Your flight (${flightNumber}) from ${departureAirport} to ${arrivalAirport} is delayed 20 minutes`;
+  let scheduledDepartureTime = flight.time.scheduled.departure ? new Date(flight.time.scheduled.departure * 1000) : null;
+  let actualDepartureTime = flight.time.real.departure ? new Date(flight.time.real.departure * 1000) : null;
+  let estimatedDepartureTime = flight.time.estimated.departure ? new Date(flight.time.estimated.departure * 1000) : null;
+
+  let mostRecentDepartureTime = actualDepartureTime || estimatedDepartureTime || scheduledDepartureTime;
+  let departureTimeString = `${mostRecentDepartureTime.toISOString().slice(11, 16)} UTC`;
+
+  let statusText = ' It will depart on time.';
+
+  if (scheduledDepartureTime && estimatedDepartureTime) {
+    statusText = ` It is delayed by ${getTimeDiff(scheduledDepartureTime, estimatedDepartureTime)}.`;
+  }
+
+  let departInString = getTimeDiff(new Date(), mostRecentDepartureTime);
+
+  return `Your flight (${flightNumber}) from ${departureAirport} to ${arrivalAirport} will depart in ${departInString} (on ${departureTimeString}).${statusText}`;
 }
 
 module.exports.handler = (event, context, callback) => {
