@@ -39,44 +39,54 @@ function getDepartureFlightRecords(departureAirportCode) {
   });
 }
 
-function getFlightRecordsSortedByDeparture(departureAirportCode){
-  return getFlightRecords(departureAirportCode).then(function(flightRecords){
-    return flightRecords.sort(function(firstFlightRecord, secondFlightRecord){
-      return firstFlightRecord.time.scheduled.departure - secondFlightRecord.time.scheduled.departure;
-    });
+function filterOutPastFlightRecords(flightRecords){
+  let unixTimeNow = Math.floor(Date.now() / 1000);
+  console.log("Filtering past records.")
+  return flightRecords.filter(function(flightRecord){
+    return flightRecord.flight.time.scheduled.departure > unixTimeNow;
   });
 }
 
-function getMostRecentFlightRecords(departureAirportCode){
-  return getFlightRecordsSortedByDeparture(departureAirportCode).then(function(flightRecords){
-    let unixTimeNow = Math.floor(Date.now() / 1000);
-    let nextFlightRecord = flightRecords.find(function(flightRecord){
-      return flightRecord.time.scheduled.departure >= unixTimeNow;
-    });
-
-    return nextFlightRecord;
+function sortByDeparture(flightRecords){
+  return flightRecords.sort(function(firstFlightRecord, secondFlightRecord){
+    return firstFlightRecord.flight.time.scheduled.departure - secondFlightRecord.flight.time.scheduled.departure;
   });
 }
 
-function getAirportIataByCity(cityName){
-  airports.AIRPORTS.find(function(airport){
+function filterOutOtherDestination(flightRecords, arrivalCity){
+  console.log("Filtering other destination records.")
+  return flightRecords.filter(function(flightRecord){
+    console.log(JSON.stringify(flightRecord.flight.airport.destination.position.region));
+    return flightRecord.flight.airport.destination.position.region.city == arrivalCity;
+  });
+}
+
+function getMostRecentFlightRecords(departureAirportCode, arrivalCity){
+  return getDepartureFlightRecords(departureAirportCode).then(function(flightRecords) {
+    console.log("Got flight records: " + JSON.stringify(flightRecords, null, 2));
+    return sortByDeparture(filterOutOtherDestination(filterOutPastFlightRecords(flightRecords), arrivalCity));
+  });
+}
+
+function getAirportByCity(cityName){
+  return airports.AIRPORTS.find(function(airport){
     return airport.city == cityName;
   });
 }
 
 module.exports.handler = (event, context, callback) => {
-    console.log("Starting with: " + JSON.stringify(event));
+    console.log("Starting with: " + JSON.stringify(event, null, 2));
     if (typeof event === 'string' || event instanceof String) {
         event = JSON.parse(event);
     }
 
-    var departureCity = event.pathParameters.departure_city;
-    var arrivalCity = event.pathParameters.arrival_city;
+    var departureCity = event.queryStringParameters.departure_city;
+    var arrivalCity = event.queryStringParameters.arrival_city;
     console.log(`Downloading flight data from ${departureCity} to ${arrivalCity}`);
-    let departureIcao = getAirportIataByCity(departureCity);
-    console.log(`Matched icao: ${departureIcao} to city ${departureCity}`);
+    let departureAirport = getAirportByCity(departureCity);
+    console.log(`Matched Airport: ${JSON.stringify(departureAirport)} (ICAO: ${departureAirport.icao}) to city ${departureCity}`);
 
-    getMostRecentFlightRecords(flight_number).then(function(recentFlightRecords) {
+    getMostRecentFlightRecords(departureAirport.icao, arrivalCity).then(function(recentFlightRecords) {
       const response = {
         statusCode: 200,
         body: JSON.stringify({
@@ -85,7 +95,7 @@ module.exports.handler = (event, context, callback) => {
         }),
       };
 
-      console.log('Response for ' + flight_number + ' is: ' + JSON.stringify(recentFlightRecords, null, 2));
+      console.log('Response for ' + departureCity + ' is: ' + JSON.stringify(recentFlightRecords, null, 2));
       callback(null, response);
     });
 };
