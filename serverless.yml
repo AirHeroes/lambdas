@@ -22,6 +22,12 @@ functions:
       - http:
           path: fr24/{flight_number}
           method: get
+  getFlightsByName:
+    handler: functions/getFlightsByName/index.handler
+    events:
+      - http:
+          path: fr24_by_name
+          method: get
   lexFlightStatus:
     handler: functions/lexFlightStatus/index.handler
     events:

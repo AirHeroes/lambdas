@@ -113,7 +113,15 @@ function createResponseContent(flight){
 
 module.exports.handler = (event, context, callback) => {
   console.log('Received request: ' + JSON.stringify(event, null, 2));
-  let flightNumber = event.currentIntent.slots.flight_number;
+  let flightNumber = event.currentIntent.slots.flight_number || event.currentIntent.slots.flight_no;
+
+  if (event.currentIntent.slots.airline_code && event.currentIntent.slots.airline_flight_number) {
+    flightNumber = '' + event.currentIntent.slots.airline_code + event.currentIntent.slots.airline_flight_number;
+  }
+
+  if (flightNumber) {
+    flightNumber = flightNumber.replace(/\./g, '').replace(/ /g, '');
+  }
   console.log('Flight number from request: ' + flightNumber);
 
   getRecentFlights(flightNumber).then(function(recentFlightRecords){
