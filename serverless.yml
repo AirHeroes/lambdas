@@ -1,4 +1,4 @@
-service: ah-serverless-fr24
+service: serverless-airheroes
 
 provider:
   name: aws
