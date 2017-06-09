@@ -33,7 +33,7 @@ function fetchFlightsFromFR24(flight_number) {
 
 function getFlightRecords(flight_number) {
   return fetchFlightsFromFR24(flight_number).then(function(statuses) {
-    return statuses.result.response.data;
+    return statuses.result.response.data || [];
   });
 }
 
@@ -78,6 +78,7 @@ module.exports.handler = (event, context, callback) => {
         }),
       };
 
+      console.log('Response for ' + flight_number + ' is: ' + JSON.stringify(recentFlightRecords, null, 2));
       callback(null, response);
     });
 };

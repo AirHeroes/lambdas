@@ -30,6 +30,7 @@ function getRecentFlights(flightNumber) {
 }
 
 function getTimeDiff(a, b){
+  console.log(`Calculating diff between ${b} and ${a}`)
   let milisecDiff = b.getTime() - a.getTime();
   let dateDiff = new Date( milisecDiff );
 
@@ -53,6 +54,7 @@ function getTimeDiff(a, b){
     timeString = timeString.concat(` ${dateDiff.getSeconds()} Seconds`)
   }
 
+  console.log("DateDiff: " + dateDiff);
   return timeString.trim();
 }
 
@@ -69,7 +71,7 @@ function createResponseContent(flight){
 
   let statusText = ' It will depart on time.';
 
-  if (scheduledDepartureTime && estimatedDepartureTime) {
+  if (scheduledDepartureTime && estimatedDepartureTime && ((estimatedDepartureTime - scheduledDepartureTime) !== 0)) {
     statusText = ` It is delayed by ${getTimeDiff(scheduledDepartureTime, estimatedDepartureTime)}.`;
   }
 
@@ -87,7 +89,7 @@ module.exports.handler = (event, context, callback) => {
     console.log('Response from getRecentFlights: ' + JSON.stringify(recentFlightRecords, null, 2));
     let lastFlight = recentFlightRecords['flightRecords'][recentFlightRecords['flightRecords'].length - 1];
     console.log('Last flight: ' + JSON.stringify(lastFlight, null, 2));
-    let content = createResponseContent(lastFlight);
+    let content = lastFlight ? createResponseContent(lastFlight) : `Flight with number: ${flightNumber} not found.`;
 
     console.log('Created content: ' + content);
 
