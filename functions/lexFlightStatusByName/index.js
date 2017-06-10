@@ -1,5 +1,7 @@
 'use strict';
 
+const https = require('https');
+
 function getRecentFlights(flightNumber) {
   var options = {
       host: 'metlu0ohua.execute-api.us-east-1.amazonaws.com',
