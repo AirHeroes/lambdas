@@ -40,3 +40,6 @@ functions:
     handler: functions/lexSubmitClaim/index.handler
   lexFlightTable:
     handler: functions/lexFlightTable/index.handler
+  lexHelp:
+    runtime: python2.7
+    handler: functions/lexHelp/handler.lambda_handler
