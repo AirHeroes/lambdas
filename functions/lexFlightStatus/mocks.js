@@ -5,7 +5,7 @@ const MOCKED_DELAYED_FLIGHT = {
         "id": "daaceb6",
         "row": 4046579842,
         "number": {
-          "default": "VY8323",
+          "default": "LO8323",
           "alternative": null
         },
         "callsign": "VLG83TJ",
@@ -147,7 +147,7 @@ const MOCKED_DELAYED_FLIGHT = {
         "id": null,
         "row": 4052748982,
         "number": {
-          "default": "VY8323",
+          "default": "LO8323",
           "alternative": null
         },
         "callsign": "VLG83TJ",
@@ -277,6 +277,6 @@ const MOCKED_DELAYED_FLIGHT = {
 };
 
 module.exports = {
-    MOCKED_DELAYED_FLIGHT_NUMBER: 'VY8323',
+    MOCKED_DELAYED_FLIGHT_NUMBER: 'LO8323',
     MOCKED_DELAYED_FLIGHT: MOCKED_DELAYED_FLIGHT,
 };

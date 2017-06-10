@@ -57,7 +57,10 @@ function filterOutOtherDestination(flightRecords, arrivalCity){
   console.log("Filtering other destination records.")
   return flightRecords.filter(function(flightRecord){
     console.log(JSON.stringify(flightRecord.flight.airport.destination.position.region));
-    return flightRecord.flight.airport.destination.position.region.city == arrivalCity;
+    if (!flightRecord.flight.airport.destination.position.region.city){
+      return false;
+    }
+    return flightRecord.flight.airport.destination.position.region.city.toLowerCase() == arrivalCity.toLowerCase();
   });
 }
 
@@ -70,7 +73,10 @@ function getMostRecentFlightRecords(departureAirportCode, arrivalCity){
 
 function getAirportByCity(cityName){
   return airports.AIRPORTS.find(function(airport){
-    return airport.city == cityName;
+    if (!airport.city){
+      return false;
+    }
+    return airport.city.toLowerCase() == cityName.toLowerCase();
   });
 }
 
